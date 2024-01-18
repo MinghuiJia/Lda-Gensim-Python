@@ -149,9 +149,10 @@ class LDAClustering():
             print('#%i: %s' % (i, str(topic)))
 
         # 计算困惑度
-        # perp = lda.log_perplexity(corpus)
+        perp = lda.log_perplexity(corpus)
         # perpCorrect = np.exp2(-perp)
-        # print('Perplexity Score: ', perpCorrect)  # 越高越好
+        perpCorrect = perp
+        print('Perplexity Score: ', perpCorrect)  # 越高越好
 
         # 计算一致性
         print("calculate LDA model topic coherence...")
@@ -161,16 +162,15 @@ class LDAClustering():
 
         lda.save(lda_model_path)
         print("LDA model saved... ")
-        return lda, coherence_lda
+        return lda, coherence_lda, perpCorrect
 
-    def lda(self, dictionary_path, corpus_path, lda_model_path, lda_num_topics, stopwords_path='./data/stop_words.txt'):
+    def lda(self, dictionary_path, corpus_path, lda_model_path, lda_num_topics):
         """
         LDA主题模型
         :param dictionary_path: 语料库构建的字典路径
         :param corpus_path: 语料库向量化后保存的文件路径
         :param lda_model_path: lda模型训练后的模型文件路径
         :param lda_num_topics: 主题个数
-        :param stopwords_path: 停用词路径
         :return:
         """
         # 获取经过处理后的每个回复的关键词数组
@@ -188,9 +188,9 @@ class LDAClustering():
         # for vector in corpus_memory_friendly:
         #     print(vector)
 
-        ldamodel, perp = self.train(lda_model_path, corpus_path, lda_num_topics, dictionary, contentsFilteredWords)
+        ldamodel, coherence, perp = self.train(lda_model_path, corpus_path, lda_num_topics, dictionary, contentsFilteredWords)
 
-        return ldamodel, perp
+        return ldamodel, coherence, perp
 
 
 if __name__ == '__main__':
@@ -203,9 +203,10 @@ if __name__ == '__main__':
 
     topic = []
     perplexity_values = []
+    coherence_values = []
     model_list = []
     LDA = LDAClustering(stopwords_path)
-    for i in range(5):
+    for i in range(50):
         lda_num_topics = (i+1)
         print("start "+str(lda_num_topics)+" topic lda model train...")
 
@@ -215,10 +216,11 @@ if __name__ == '__main__':
 
 
         # 该代码没有设置lda模型训练时候的迭代次数，默认50次
-        ldamodel, perp = LDA.lda(dictionary_path, corpus_path, lda_model_path, lda_num_topics, stopwords_path)
+        ldamodel, coherence, perp = LDA.lda(dictionary_path, corpus_path, lda_model_path, lda_num_topics, stopwords_path)
 
         topic.append(lda_num_topics)
         perplexity_values.append(perp)
+        coherence_values.append(coherence)
         model_list.append(ldamodel)
 
         print("finished " + str(lda_num_topics) + " topic lda model train...")
@@ -236,7 +238,7 @@ if __name__ == '__main__':
     # xticks(np.linspace(1,num_topics,num_topics,endpoint=True))
 
     ax2 = fig.add_subplot(1, 2, 2)
-    plt.plot(topic, perplexity_values, marker='o')
+    plt.plot(topic, coherence_values, marker='o')
     plt.title("主题建模-一致性")
     plt.xlabel("主题数目")
     plt.ylabel("一致性大小")
