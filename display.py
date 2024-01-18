@@ -1,7 +1,7 @@
 from gensim.models import LdaModel
 from gensim import corpora
 
-lda_num_topics = 10
+lda_num_topics = 7 #8 #9 #5
 dictionary_path = "models/dictionary"+str(lda_num_topics)+".dict"
 corpus_path = "models/corpus"+str(lda_num_topics)+".lda-c"
 lda_model_path = "models/lda_model_"+str(lda_num_topics)+"_topics.lda"

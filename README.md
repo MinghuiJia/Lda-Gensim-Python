@@ -20,3 +20,5 @@
   - data\stop_words_old.txt - 是demo对应使用的停用词
   - data\test_data2.txt - 是demo的数据
 - 目前代码还差一个基于当前语料库，根据主题连通性（topic coherence）来确定主题中高分词之间的语义相似程度，从而搜索最佳主题，确定语料库中主题的数量
+- query.py - 是用于从数据库中获取相关关键词的数据的测试文件
+- data中的Figure_1.png是迭代训练寻找最优topic数量的可视化图
