@@ -150,13 +150,13 @@ class LDAClustering():
 
         # 计算困惑度
         perp = lda.log_perplexity(corpus)
-        # perpCorrect = np.exp2(-perp)
-        perpCorrect = perp
-        print('Perplexity Score: ', perpCorrect)  # 越高越好
+        perpCorrect = np.exp2(-perp)
+        # perpCorrect = perp
+        print('Perplexity Score: ', perpCorrect)  # 越低越好
 
         # 计算一致性
         print("calculate LDA model topic coherence...")
-        lda_cm = CoherenceModel(model=lda, texts=text, dictionary=id2word, coherence='c_v', corpus=corpus)
+        lda_cm = CoherenceModel(model=lda, texts=text, dictionary=id2word, coherence='u_mass', corpus=corpus)
         coherence_lda = lda_cm.get_coherence()
         print('Coherence Score: ', coherence_lda)  # 越高越好
 

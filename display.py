@@ -1,11 +1,10 @@
 from gensim.models import LdaModel
 from gensim import corpora
 
-
-dictionary_path = "models/dictionary.dict"
-corpus_path = "models/corpus.lda-c"
 lda_num_topics = 10
-lda_model_path = "models/lda_model_10_topics.lda"
+dictionary_path = "models/dictionary"+str(lda_num_topics)+".dict"
+corpus_path = "models/corpus"+str(lda_num_topics)+".lda-c"
+lda_model_path = "models/lda_model_"+str(lda_num_topics)+"_topics.lda"
 
 dictionary = corpora.Dictionary.load(dictionary_path)
 corpus = corpora.BleiCorpus(corpus_path)
