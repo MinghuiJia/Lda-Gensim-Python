@@ -6,6 +6,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 import gensim
 from gensim import corpora
 from gensim.corpora import BleiCorpus
+from gensim.models.coherencemodel import CoherenceModel
 
 from Dictionary import Dictionary
 
@@ -117,7 +118,7 @@ class LDAClustering():
         print("corpus data preprocessing finished... ")
         return contentsFilteredWords
 
-    def train(self, lda_model_path, corpus_path, num_topics, id2word):
+    def train(self, lda_model_path, corpus_path, num_topics, id2word, text):
         """
         LDA模型训练
         :param lda_model_path: lda模型训练后的模型文件路径
@@ -134,6 +135,16 @@ class LDAClustering():
         print("LDA model start train... ")
         lda = gensim.models.LdaModel(corpus, num_topics=num_topics, id2word=id2word)
         print("LDA model finished train... ")
+        print("LDA model " + str(num_topics) + " topics... ")
+        for i, topic in enumerate(lda.show_topics(num_topics=num_topics)):
+            print('#%i: %s' % (i, str(topic)))
+
+        # 计算一致性
+        print("calculate LDA model topic coherence...")
+        lda_cm = CoherenceModel(model=lda, texts=text, dictionary=id2word, coherence='c_v')
+        coherence_lda = lda_cm.get_coherence()
+        print('Coherence Score: ', coherence_lda)  # 越高越好
+
         lda.save(lda_model_path)
         print("LDA model saved... ")
         return lda
@@ -163,7 +174,7 @@ class LDAClustering():
         # for vector in corpus_memory_friendly:
         #     print(vector)
 
-        self.train(lda_model_path, corpus_path, lda_num_topics, dictionary)
+        ldamodel = self.train(lda_model_path, corpus_path, lda_num_topics, dictionary, contentsFilteredWords)
 
 
 
@@ -183,3 +194,4 @@ if __name__ == '__main__':
     # 该代码没有设置lda模型训练时候的迭代次数，默认50次
     LDA = LDAClustering()
     LDA.lda(dictionary_path, corpus_path, lda_model_path, lda_num_topics, stopwords_path)
+
