@@ -216,7 +216,7 @@ if __name__ == '__main__':
 
 
         # 该代码没有设置lda模型训练时候的迭代次数，默认50次
-        ldamodel, coherence, perp = LDA.lda(dictionary_path, corpus_path, lda_model_path, lda_num_topics, stopwords_path)
+        ldamodel, coherence, perp = LDA.lda(dictionary_path, corpus_path, lda_model_path, lda_num_topics)
 
         topic.append(lda_num_topics)
         perplexity_values.append(perp)
