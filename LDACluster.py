@@ -8,6 +8,11 @@ from gensim import corpora
 from gensim.corpora import BleiCorpus
 from gensim.models.coherencemodel import CoherenceModel
 
+import matplotlib.pyplot as plt
+import matplotlib
+import numpy as np
+# import pyLDAvis.gensim
+
 from Dictionary import Dictionary
 
 import pymysql
@@ -54,6 +59,10 @@ class Corpus(object):
         return self
 
 class LDAClustering():
+    def __init__(self, stopwords_path):
+        self.content = self.get_contents()
+        self.contentsFilteredWords = self.pre_process_corpus(stopwords_path)
+
     def load_stopwords(self, stopwords_path):
         with open(stopwords_path, 'r', encoding='utf-8') as f:
             return [line.strip() for line in f]
@@ -73,7 +82,7 @@ class LDAClustering():
         """
         print("corpus data preprocessing start... ")
 
-        contents = self.get_contents()
+        contents = self.content
         print("total "+str(len(contents)), " contents...")
 
         # 使用 WordNetLemmatizer 查找每个名词的词根形式
@@ -139,15 +148,20 @@ class LDAClustering():
         for i, topic in enumerate(lda.show_topics(num_topics=num_topics)):
             print('#%i: %s' % (i, str(topic)))
 
+        # 计算困惑度
+        # perp = lda.log_perplexity(corpus)
+        # perpCorrect = np.exp2(-perp)
+        # print('Perplexity Score: ', perpCorrect)  # 越高越好
+
         # 计算一致性
         print("calculate LDA model topic coherence...")
-        lda_cm = CoherenceModel(model=lda, texts=text, dictionary=id2word, coherence='c_v')
+        lda_cm = CoherenceModel(model=lda, texts=text, dictionary=id2word, coherence='c_v', corpus=corpus)
         coherence_lda = lda_cm.get_coherence()
         print('Coherence Score: ', coherence_lda)  # 越高越好
 
         lda.save(lda_model_path)
         print("LDA model saved... ")
-        return lda
+        return lda, coherence_lda
 
     def lda(self, dictionary_path, corpus_path, lda_model_path, lda_num_topics, stopwords_path='./data/stop_words.txt'):
         """
@@ -160,7 +174,7 @@ class LDAClustering():
         :return:
         """
         # 获取经过处理后的每个回复的关键词数组
-        contentsFilteredWords = self.pre_process_corpus(stopwords_path=stopwords_path)
+        contentsFilteredWords = self.contentsFilteredWords
 
         # 创建词典
         dictionary = Dictionary(contentsFilteredWords, dictionary_path).build()
@@ -174,8 +188,9 @@ class LDAClustering():
         # for vector in corpus_memory_friendly:
         #     print(vector)
 
-        ldamodel = self.train(lda_model_path, corpus_path, lda_num_topics, dictionary, contentsFilteredWords)
+        ldamodel, perp = self.train(lda_model_path, corpus_path, lda_num_topics, dictionary, contentsFilteredWords)
 
+        return ldamodel, perp
 
 
 if __name__ == '__main__':
@@ -184,14 +199,52 @@ if __name__ == '__main__':
     # nltk.download()
     #
     # 'wordnet'  'omw-1.4'  'average_perceptron_tagger'  'punkt'
-
-    dictionary_path = "models/dictionary.dict"
     stopwords_path = "data/stopwords.txt"
-    corpus_path = "models/corpus.lda-c"
-    lda_model_path = "models/lda_model_10_topics.lda"
-    lda_num_topics = 10
 
-    # 该代码没有设置lda模型训练时候的迭代次数，默认50次
-    LDA = LDAClustering()
-    LDA.lda(dictionary_path, corpus_path, lda_model_path, lda_num_topics, stopwords_path)
+    topic = []
+    perplexity_values = []
+    model_list = []
+    LDA = LDAClustering(stopwords_path)
+    for i in range(5):
+        lda_num_topics = (i+1)
+        print("start "+str(lda_num_topics)+" topic lda model train...")
 
+        dictionary_path = "models/dictionary"+str(lda_num_topics)+".dict"
+        corpus_path = "models/corpus"+str(lda_num_topics)+".lda-c"
+        lda_model_path = "models/lda_model_"+str(lda_num_topics)+"_topics.lda"
+
+
+        # 该代码没有设置lda模型训练时候的迭代次数，默认50次
+        ldamodel, perp = LDA.lda(dictionary_path, corpus_path, lda_model_path, lda_num_topics, stopwords_path)
+
+        topic.append(lda_num_topics)
+        perplexity_values.append(perp)
+        model_list.append(ldamodel)
+
+        print("finished " + str(lda_num_topics) + " topic lda model train...")
+
+    # 绘制困惑度和一致性折线图
+    fig = plt.figure(figsize=(15, 5))
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    matplotlib.rcParams['axes.unicode_minus'] = False
+
+    ax1 = fig.add_subplot(1, 2, 1)
+    plt.plot(topic, perplexity_values, marker='o')
+    plt.title('主题建模-困惑度')
+    plt.xlabel('主题数目')
+    plt.ylabel('困惑度大小')
+    # xticks(np.linspace(1,num_topics,num_topics,endpoint=True))
+
+    ax2 = fig.add_subplot(1, 2, 2)
+    plt.plot(topic, perplexity_values, marker='o')
+    plt.title("主题建模-一致性")
+    plt.xlabel("主题数目")
+    plt.ylabel("一致性大小")
+
+    plt.show()
+
+    # # 可视化
+    # vis_data=pyLDAvis.gensim.prepare(model_list[6],corpus,dictionary)
+    # pyLDAvis.show(vis_data,open_browser=False)
+    # # 保存到本地html
+    # pyLDAvis.save_html(vis_data, 'pyLDAvis.html')
