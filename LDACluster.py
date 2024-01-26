@@ -11,17 +11,31 @@ from gensim.models.coherencemodel import CoherenceModel
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
+import re
 # import pyLDAvis.gensim
 
 from Dictionary import Dictionary
 
+import collections
+
 import pymysql
+
+from openpyxl import Workbook
+
+def write_tuples_to_excel(tuples, filename):
+    workbook = Workbook()
+    sheet = workbook.active
+
+    for row in tuples:
+        sheet.append(row)
+
+    workbook.save(filename)
 
 def queryDataFromMysql(sql, param=None):
     # 存储到数据库
     # 连接数据库
     conn = pymysql.connect(host='localhost', port=3306,
-                           user='root', password='123456',
+                           user='root', password='JMHjmh1998',
                            database='crawlerdb')
 
     # 使用 cursor() 方法创建一个游标对象 cursor
@@ -59,7 +73,8 @@ class Corpus(object):
         return self
 
 class LDAClustering():
-    def __init__(self, stopwords_path):
+    def __init__(self, stopwords_path, sql):
+        self.sql = sql
         self.content = self.get_contents()
         self.contentsFilteredWords = self.pre_process_corpus(stopwords_path)
 
@@ -68,11 +83,19 @@ class LDAClustering():
             return [line.strip() for line in f]
 
     def get_contents(self):
-        sql = '''
-                    select answer_content from quora_answers_questions;
-                '''
-        contents = queryDataFromMysql(sql)
+        contents = queryDataFromMysql(self.sql)
         return contents
+
+    def get_words_freq(self, excel_path):
+        # 获得词频
+        cnt = collections.Counter()  # 创建Counter这个类
+        for sentence in self.contentsFilteredWords:
+            for word in sentence:
+                cnt[word] += 1
+
+        words_freq = cnt.most_common()
+        # 将数据写入Excel文件
+        write_tuples_to_excel(words_freq, excel_path)
 
     def pre_process_corpus(self, stopwords_path):
         """
@@ -119,7 +142,14 @@ class LDAClustering():
             # 词形还原
             # 将一个单词的各种变体（例如时态、语态、数等）还原为其基本词形或词根形式
             for word in words:
-                nouns.append(lem.lemmatize(word["word"]))
+                convert_word = lem.lemmatize(word["word"])
+                # 清洗excel中的非法字符，都是不常见的不可显示字符，例如退格，响铃等
+                ILLEGAL_CHARACTERS_RE = re.compile(r'[\000-\010]|[\013-\014]|[\016-\037]')
+                if (next(ILLEGAL_CHARACTERS_RE.finditer(convert_word), None)):
+                    continue
+                # 词性还原后再根据停用词筛选一遍
+                if (convert_word not in stopwords):
+                    nouns.append(convert_word)
 
             contentsFilteredWords.append(nouns)
 
@@ -152,7 +182,7 @@ class LDAClustering():
         perp = lda.log_perplexity(corpus)
         perpCorrect = np.exp2(-perp)
         # perpCorrect = perp
-        print('Perplexity Score: ', perpCorrect)  # 越低越好
+        print('Perplexity Score: ', perpCorrect)  # 越高越好
 
         # 计算一致性
         print("calculate LDA model topic coherence...")
@@ -199,20 +229,57 @@ if __name__ == '__main__':
     # nltk.download()
     #
     # 'wordnet'  'omw-1.4'  'average_perceptron_tagger'  'punkt'
+
+    # # 碳中和相关的关键词lda分析，数量：4359
+    sql = '''
+                    select answer_content
+                    from quora_answers_questions_filter_more
+                    where keyword = 'china carbon neutrality'
+                    or keyword = 'china double carbon plan'
+                    or keyword = 'china carbon peak'
+                    ;
+                '''
+    # # 能源相关的关键词lda分析，数量：6282
+    # sql = '''
+    #                     select answer_content
+    #                     from quora_answers_questions_filter_more
+    #                     where keyword = 'china new energy'
+    #                     or keyword = 'china energy conservation'
+    #                     ;
+    #                 '''
+    # 科技相关的关键词lda分析，数量：2512
+    # sql = '''
+    #                                 select answer_content
+    #                                 from quora_answers_questions_filter_more
+    #                                 where keyword = 'china technology'
+    #                                 ;
+    #                             '''
+
     stopwords_path = "data/stopwords.txt"
 
     topic = []
     perplexity_values = []
     coherence_values = []
     model_list = []
-    LDA = LDAClustering(stopwords_path)
-    for i in range(50):
+    LDA = LDAClustering(stopwords_path, sql)
+    # 获取词频
+    LDA.get_words_freq('models_energy/freq_energy.xlsx')
+    for i in range(20):
         lda_num_topics = (i+1)
         print("start "+str(lda_num_topics)+" topic lda model train...")
 
-        dictionary_path = "models/dictionary"+str(lda_num_topics)+".dict"
-        corpus_path = "models/corpus"+str(lda_num_topics)+".lda-c"
-        lda_model_path = "models/lda_model_"+str(lda_num_topics)+"_topics.lda"
+        dictionary_path = "models_carbon/dictionary"+str(lda_num_topics)+".dict"
+        corpus_path = "models_carbon/corpus"+str(lda_num_topics)+".lda-c"
+        lda_model_path = "models_carbon/lda_model_"+str(lda_num_topics)+"_topics.lda"
+
+        # dictionary_path = "models_energy/dictionary" + str(lda_num_topics) + ".dict"
+        # corpus_path = "models_energy/corpus" + str(lda_num_topics) + ".lda-c"
+        # lda_model_path = "models_energy/lda_model_" + str(lda_num_topics) + "_topics.lda"
+
+        # dictionary_path = "models_technology/dictionary" + str(lda_num_topics) + ".dict"
+        # corpus_path = "models_technology/corpus" + str(lda_num_topics) + ".lda-c"
+        # lda_model_path = "models_technology/lda_model_" + str(lda_num_topics) + "_topics.lda"
+
 
 
         # 该代码没有设置lda模型训练时候的迭代次数，默认50次

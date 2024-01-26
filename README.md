@@ -1,6 +1,7 @@
 # 基于Gensim的LDA模型
 ## 数据来源
   - data/crawlerdb.sql 中存储着爬取quora的回答文本
+  - quora_answers_questions_filter_more.sql 中存储着最终爬取和关键字相关的quora帖子
   - 导入数据之后，quora_answers_questions表中可以获取对应的answer_content
   - 每个回答answer_content都会作为一个document进行数据预处理，并完成LDA模型训练
 ## 模型
@@ -22,3 +23,4 @@
 - 目前代码还差一个基于当前语料库，根据主题连通性（topic coherence）来确定主题中高分词之间的语义相似程度，从而搜索最佳主题，确定语料库中主题的数量
 - query.py - 是用于从数据库中获取相关关键词的数据的测试文件
 - data中的Figure_1.png是迭代训练寻找最优topic数量的可视化图
+- generateNewSqlTable.py - 用于根据筛选条件重新生成数据库中的表
