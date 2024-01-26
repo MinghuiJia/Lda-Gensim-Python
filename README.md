@@ -11,6 +11,7 @@
     - 删除拆分后的停用词
     - 词性标注，过滤掉所有非名词的单词
     - 词性还原，还原为词根形式
+    - 词性还原后再删除一遍停用词（那些复数单词可能还原之后又会出现）
   - 将处理后的所有数据构建为语料库词典
   - 基于语料库词典，将文本构建为词向量
   - 使用Gensim SDK完成LDA模型的训练
@@ -20,7 +21,6 @@
 - LDACluster_copy.py - 使用sklearn的LatentDirichletAllocation模型完成LDA训练的demo文件
   - data\stop_words_old.txt - 是demo对应使用的停用词
   - data\test_data2.txt - 是demo的数据
-- 目前代码还差一个基于当前语料库，根据主题连通性（topic coherence）来确定主题中高分词之间的语义相似程度，从而搜索最佳主题，确定语料库中主题的数量
 - query.py - 是用于从数据库中获取相关关键词的数据的测试文件
 - data中的Figure_1.png是迭代训练寻找最优topic数量的可视化图
 - generateNewSqlTable.py - 用于根据筛选条件重新生成数据库中的表
