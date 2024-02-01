@@ -24,3 +24,4 @@
 - query.py - 是用于从数据库中获取相关关键词的数据的测试文件
 - data中的Figure_1.png是迭代训练寻找最优topic数量的可视化图
 - generateNewSqlTable.py - 用于根据筛选条件重新生成数据库中的表
+- calTopicWeight.py - 用于计算训练好的LDA模型每个主题的权重
