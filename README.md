@@ -2,6 +2,7 @@
 ## 数据来源
   - data/crawlerdb.sql 中存储着爬取quora的回答文本
   - quora_answers_questions_filter_more.sql 中存储着最终爬取和关键字相关的quora帖子
+  - weibo_answers.sql 中存储着最终爬取的weibo内容
   - 导入数据之后，quora_answers_questions表中可以获取对应的answer_content
   - 每个回答answer_content都会作为一个document进行数据预处理，并完成LDA模型训练
 ## 模型
@@ -16,8 +17,10 @@
   - 基于语料库词典，将文本构建为词向量
   - 使用Gensim SDK完成LDA模型的训练
 ## 其他
-- 停用词（data\stopwords.txt）：来源于康奈尔大学实验性SMART信息检索系统创建
+- 停用词（data\stopwords.txt）：来源于康奈尔大学实验性SMART信息检索系统创建、以及哈工大的中文停用词
 - 代码学习reference：https://vladsandulescu.com/topic-prediction-lda-user-reviews/
+- LDACluster.py - 使用Gensim SDK完成LDA模型的训练
+- LDACluster_chinese.py - 使用Gensim SDK完成LDA模型的训练（处理中文的代码）
 - LDACluster_copy.py - 使用sklearn的LatentDirichletAllocation模型完成LDA训练的demo文件
   - data\stop_words_old.txt - 是demo对应使用的停用词
   - data\test_data2.txt - 是demo的数据
@@ -25,3 +28,4 @@
 - data中的Figure_1.png是迭代训练寻找最优topic数量的可视化图
 - generateNewSqlTable.py - 用于根据筛选条件重新生成数据库中的表
 - calTopicWeight.py - 用于计算训练好的LDA模型每个主题的权重
+- calTopicWeight_chinese.py - 用于计算训练好的LDA模型每个主题的权重（处理中文的代码）
