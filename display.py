@@ -30,10 +30,10 @@ num_words = 30
 # lda_model_path = "models_copy/models_energy/lda_model_" + str(lda_num_topics) + "_topics.lda"
 
 # # technology的分类，最好是 10   科技相关的关键词lda分析，数量：2512 semiconductor-半导体 space-太空、航天 手机 ai 制造业-军事、导弹 系统 市场 公司 与日本、美国、印度比较
-lda_num_topics = 10 #2 3 4 10
-dictionary_path = "models_copy/models_technology/dictionary"+str(lda_num_topics)+".dict"
-corpus_path = "models_copy/models_technology/corpus"+str(lda_num_topics)+".lda-c"
-lda_model_path = "models_copy/models_technology/lda_model_"+str(lda_num_topics)+"_topics.lda"
+lda_num_topics = 8 #2 3 4 10
+dictionary_path = "models/sijilao/dictionary"+str(lda_num_topics)+".dict"
+corpus_path = "models/sijilao/corpus"+str(lda_num_topics)+".lda-c"
+lda_model_path = "models/sijilao/lda_model_"+str(lda_num_topics)+"_topics.lda"
 
 dictionary = corpora.Dictionary.load(dictionary_path)
 corpus = corpora.BleiCorpus(corpus_path)
@@ -64,4 +64,4 @@ for i, topic in enumerate(lda.show_topics(num_topics=lda_num_topics, num_words=n
     print('#%i: %s' % (i, str(topic)))
 
 # 写入excel
-write_tuples_to_excel(lizt, "models_copy/models_technology/topics_"+str(num_words)+"_keywords.xlsx")
+write_tuples_to_excel(lizt, "models/sijilao/topics_"+str(num_words)+"_keywords.xlsx")

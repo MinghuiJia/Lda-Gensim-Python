@@ -151,10 +151,10 @@ def pre_process_corpus(stopwords_path, sql):
 num_words = 30
 
 # # carbon的分类，最好是7   加密货币走向碳中和：https://www.sohu.com/a/469656016_100217347 碳中和相关的关键词lda分析，数量：4359
-lda_num_topics = 11 #6 #4
-dictionary_path = "models_guizi/dictionary"+str(lda_num_topics)+".dict"
-corpus_path = "models_guizi/corpus"+str(lda_num_topics)+".lda-c"
-lda_model_path = "models_guizi/lda_model_"+str(lda_num_topics)+"_topics.lda"
+lda_num_topics = 8 #6 #4
+dictionary_path = "models/sijilao/dictionary"+str(lda_num_topics)+".dict"
+corpus_path = "models/sijilao/corpus"+str(lda_num_topics)+".lda-c"
+lda_model_path = "models/sijilao/lda_model_"+str(lda_num_topics)+"_topics.lda"
 
 # # energy的分类，最好是 7   能源相关的关键词lda分析，数量：6282 俄罗斯的能源对比  海外正在酝酿一个新能源联盟吗?在欧佩克之外，中国和俄罗斯是能源市场的主要参与者吗   为什么沙特阿拉伯、俄罗斯和中国不停止向美国出口东西，没有石油和许多制成品等，美国肯定会失败或被削弱
 # lda_num_topics = 7 #3

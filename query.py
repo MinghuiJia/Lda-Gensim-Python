@@ -48,16 +48,9 @@ if __name__ == "__main__":
         'china technology',
     ]
     sql = '''
-                select answer_content
-                from quora_answers_questions
-                where question_name LIKE '%china%'
-                or (question_name LIKE '%carbon%'
-                or question_name LIKE '%technology%'
-                or question_name LIKE '%development%'
-                or question_name LIKE '%climatologists%'
-                or question_name LIKE '%energy%'
-                or question_name LIKE '%neutrality%'
-                or question_name LIKE '%peak%')
+                select post_content
+                from weibo_answers_new
+                where keyword='农村人'
                 ;
             '''
     questionNames = get_contents(sql)

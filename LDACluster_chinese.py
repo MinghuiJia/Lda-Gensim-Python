@@ -246,7 +246,8 @@ if __name__ == '__main__':
     # # 日本鬼子的关键词lda分析，数量：116318
     sql = '''
                     select post_content
-                    from weibo_answers
+                    from weibo_answers_new
+                    where keyword='死基佬'
                     ;
                 '''
 
@@ -258,14 +259,14 @@ if __name__ == '__main__':
     model_list = []
     LDA = LDAClustering(stopwords_path, sql)
     # 获取词频
-    LDA.get_words_freq('models_guizi/freq_guizi.xlsx')
+    LDA.get_words_freq('models/sijilao/freq.xlsx')
     for i in range(20):
         lda_num_topics = (i+1)
         print("start "+str(lda_num_topics)+" topic lda model train...")
 
-        dictionary_path = "models_guizi/dictionary"+str(lda_num_topics)+".dict"
-        corpus_path = "models_guizi/corpus"+str(lda_num_topics)+".lda-c"
-        lda_model_path = "models_guizi/lda_model_"+str(lda_num_topics)+"_topics.lda"
+        dictionary_path = "models/sijilao/dictionary"+str(lda_num_topics)+".dict"
+        corpus_path = "models/sijilao/corpus"+str(lda_num_topics)+".lda-c"
+        lda_model_path = "models/sijilao/lda_model_"+str(lda_num_topics)+"_topics.lda"
 
         # dictionary_path = "models_energy/dictionary" + str(lda_num_topics) + ".dict"
         # corpus_path = "models_energy/corpus" + str(lda_num_topics) + ".lda-c"
